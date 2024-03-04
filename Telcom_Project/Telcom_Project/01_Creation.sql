@@ -40,12 +40,11 @@ GO
 CREATE TABLE [New_Comer] (
   [Enter_ID] int PRIMARY KEY IDENTITY(1,1),
   [Customer_ID] int,
-  [Acquisition_Channel_ID] int,
   [Contract_Type] varchar(30),
   [Acquisition_Date] Date
  
   CONSTRAINT [Enter_Customer] FOREIGN KEY ([Customer_ID]) REFERENCES [Customer] ([Customer_ID]),
-  CONSTRAINT [Enter_Aquisition_Channel] FOREIGN KEY ([Acquisition_Channel_ID]) REFERENCES [Aquisition_Channel] ([Channel_ID])
+  
 )
 GO
  
