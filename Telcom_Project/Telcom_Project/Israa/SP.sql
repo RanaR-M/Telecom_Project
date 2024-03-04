@@ -13,7 +13,9 @@ BEGIN
     WHERE
         Contract_Type = @ContractType
 END
-----EXEC SelectNewcomersByContract @ContractType = edylo type
+----EXEC NewcomersByContract @ContractType = edylo type
+
+
                               ----customers by CLTV
 GO
 CREATE OR ALTER PROC HighValueCustomers
