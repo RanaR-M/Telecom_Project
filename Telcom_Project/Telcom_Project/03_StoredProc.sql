@@ -32,3 +32,60 @@ BEGIN
     FROM Churn_Customer cc
     JOIN Churn_Reason cr ON cc.Outer_ID = cr.Churned_ID;
 END;
+
+--Form for Newcomers 
+CREATE PROCEDURE CreateNewcomerForm
+    @No_of_Dependent INT,
+    @DOB DATE,
+    @Email VARCHAR(100),
+    @Has_Dependent BIT,
+    @Has_Referrals BIT,
+    @No_of_Referrals INT,
+    @ChannelName VARCHAR(50),
+    @Contract_Type VARCHAR(30),
+    @Acquisition_Date DATE
+AS
+BEGIN
+    INSERT INTO [Customer] ([No_of_Dependent], [DOB], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
+    VALUES (@No_of_Dependent, @DOB, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
+
+    DECLARE channel CURSOR FOR
+    SELECT [Channel_ID], [Channel_Name]
+    FROM [Acquisition_Channel]; -- corrected table name spelling
+
+    OPEN channel;
+
+    DECLARE @Channel_ID INT,
+            @Channel_Name NVARCHAR(100);
+
+    FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF @Channel_Name = @ChannelName
+        BEGIN
+            INSERT INTO [Customer] ([ChannelName]) VALUES (@Channel_Name);
+        END
+
+        FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
+    END;
+
+    CLOSE channel;
+    DEALLOCATE channel;
+    -----insert  in to New_Comer
+    INSERT INTO [New_Comer] ([Contract_Type], [Acquisition_Date])
+    VALUES (@Contract_Type, GETDATE());
+
+    -- Print the information 
+    SELECT @No_of_Dependent AS No_of_Dependent,
+           @DOB AS DOB,
+           @Has_Dependent AS Has_Dependent,
+           @Has_Referrals AS Has_Referrals,
+           @No_of_Referrals AS No_of_Referrals,
+           @ChannelName AS ChannelName,
+           @Contract_Type AS Contract_Type,
+           @Acquisition_Date AS Acquisition_Date;
+END;
+
+
+
+
