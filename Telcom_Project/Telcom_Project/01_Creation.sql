@@ -14,12 +14,16 @@ CREATE TABLE [Customer] (
   [Has_Referrals] bit not null,
   [No_of_Referrals] int not null,
   Channel_ID INT ,
+  Gender VARCHAR(20)
 	CONSTRAINT customer_aqu FOREIGN KEY (Channel_ID) REFERENCES Aquisition_Channel (Channel_ID),
 	CONSTRAINT Email_Check Check (Email LIKE '%[a-zA-Z0-9_\-]+@([a-zA-Z0-9_\-]+\.) + (com|org|edu|nz|au])%'),
-	CONSTRAINT Status_Check Check ([Status] in ('Stayed','Joined','Churned'))
+	CONSTRAINT Status_Check Check ([Status] in ('Stayed','Joined','Churned')),
+	CONSTRAINT Gender_check check (Gender in ('Male', 'Female'))
 )
 GO
  
+
+
 CREATE TABLE Churn_Customer(
   [Outer_ID] int PRIMARY KEY IDENTITY(1,1),
   [Customer_ID] int,

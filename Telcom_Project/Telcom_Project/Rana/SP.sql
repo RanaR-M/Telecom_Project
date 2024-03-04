@@ -3,29 +3,15 @@
 -- This procedure selects customers based on their payment method.
 
 CREATE PROC ViewCustomerInfoPayment_Proc 
-(
-	@PaymentMethod_ID INT
-)
 AS
 BEGIN
 	SELECT 
-	  Cust.[Customer_ID],
-	  [Status],
-	  [Churn_Score] ,
-	  [No_of_Dependent],
-	  [DOB],
-	  [Email],
-	  [CLTV],
-	  [Has_Dependent],
-	  [Has_Referrals],
-	  [No_of_Referrals], 
-	  PayM.Payment_Type
-	FROM Customer Cust
-	LEFT JOIN [dbo].[Customer_Paying] CustPay
-	ON CustPay.Customer_ID = Cust.Customer_ID
+	  PayM.Payment_Type,
+	  COUNT(CustPay.Customer_ID) '# Customers'
+	FROM [dbo].[Customer_Paying] CustPay
 	LEFT JOIN [dbo].[Payment_Method] PayM
 	ON PayM.Payment_Method_ID = CustPay.Payment_ID	
-	where PayM.Payment_Method_ID = @PaymentMethod_ID
+	GROUP BY PayM.Payment_Type 
 END
 
 
@@ -94,8 +80,20 @@ CREATE PROC GetCountCallsTopic
 AS
 BEGIN
 	SELECT 
-	COUNT(Call_id) '# of calls'
+	COUNT(Call_id) '# calls',
+	topic
 	FROM [dbo].[Call_Customer_Agent]
 	WHERE topic = @topic
 END
 
+--- this procs gets # of calls by topic
+GO
+CREATE PROC GetCountCallsALLTopic
+AS
+BEGIN
+	SELECT 
+	COUNT(Call_id) '# calls',
+	topic
+	FROM [dbo].[Call_Customer_Agent]
+	GROUP BY topic
+END
