@@ -46,12 +46,16 @@ CREATE PROCEDURE CreateNewcomerForm
     @Acquisition_Date DATE
 AS
 BEGIN
+    DECLARE @Customer_ID INT;
+
     INSERT INTO [Customer] ([No_of_Dependent], [DOB], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
     VALUES (@No_of_Dependent, @DOB, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
 
+    SET @Customer_ID = SCOPE_IDENTITY(); -- Get the last inserted Customer_ID
+
     DECLARE channel CURSOR FOR
     SELECT [Channel_ID], [Channel_Name]
-    FROM [Acquisition_Channel]; -- corrected table name spelling
+    FROM [Acquisition_Channel];
 
     OPEN channel;
 
@@ -63,7 +67,7 @@ BEGIN
     BEGIN
         IF @Channel_Name = @ChannelName
         BEGIN
-            INSERT INTO [Customer] ([Channel_ID]) VALUES (@Channel_ID);
+            INSERT INTO [Customer] ([ChannelName]) VALUES (@Channel_Name);
         END
 
         FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
@@ -71,12 +75,13 @@ BEGIN
 
     CLOSE channel;
     DEALLOCATE channel;
-    -----insert  in to New_Comer
-    INSERT INTO [New_Comer] ([Contract_Type], [Acquisition_Date])
-    VALUES (@Contract_Type, GETDATE());
 
-    -- Print the information 
-    SELECT @No_of_Dependent AS No_of_Dependent,
+    INSERT INTO [New_Comer] ([Customer_ID], [Contract_Type], [Acquisition_Date])
+    VALUES (@Customer_ID, @Contract_Type, GETDATE());
+
+    --  print the inserted data
+    SELECT @Customer_ID AS Customer_ID,
+           @No_of_Dependent AS No_of_Dependent,
            @DOB AS DOB,
            @Has_Dependent AS Has_Dependent,
            @Has_Referrals AS Has_Referrals,
@@ -85,6 +90,7 @@ BEGIN
            @Contract_Type AS Contract_Type,
            @Acquisition_Date AS Acquisition_Date;
 END;
+
 
 
 
