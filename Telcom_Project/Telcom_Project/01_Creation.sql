@@ -12,8 +12,6 @@ CREATE TABLE [Customer] (
   [Status] varchar(30),
   [Churn_Score] int,
   [No_of_Dependent] int not null,
-  [FName] varchar(50),
-  [LName] varchar(50),
   [DOB] Date not null,
   [Email] varchar(Max),
   [CLTV] int not null,
