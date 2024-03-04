@@ -63,7 +63,7 @@ BEGIN
     BEGIN
         IF @Channel_Name = @ChannelName
         BEGIN
-            INSERT INTO [Customer] ([ChannelName]) VALUES (@Channel_Name);
+            INSERT INTO [Customer] ([Channel_ID]) VALUES (@Channel_ID);
         END
 
         FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
