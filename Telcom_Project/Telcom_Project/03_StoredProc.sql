@@ -10,3 +10,15 @@ BEGIN
     FROM Customers c Join [Aquisition_Channel] AC 
     ON c.[Customer_ID] = AC.[Customer_ID];
 END;
+
+--Display Customer based on Value of ChurnStatus
+CREATE PROCEDURE SelectCustomersByChurnStatus
+    @ChurnStatus VARCHAR(50)
+AS
+BEGIN
+    DECLARE @SQLQuery NVARCHAR(MAX);
+
+    SET @SQLQuery = 'SELECT * FROM Customers WHERE ChurnStatus = @ChurnStatus';
+
+    EXEC sp_executesql @SQLQuery, N'@ChurnStatus VARCHAR(50)', @ChurnStatus;
+END;
