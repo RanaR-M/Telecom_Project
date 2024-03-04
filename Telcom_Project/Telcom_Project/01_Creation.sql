@@ -147,6 +147,7 @@ CREATE TABLE [Population] (
 
 CREATE TABLE [Agent] (
   [Agent_id] int PRIMARY KEY,
+  [Name] nvarchar(30),
   [HANDLING_TIME] decimal 
 );
 
@@ -162,6 +163,7 @@ CREATE TABLE [Call_Customer_Agent] (
   [resolution_status] bit,
   [topic] varchar(30),
   [speed_of_answer] int,
+  [Duration] int  null ,
   FOREIGN KEY ([customer_id]) REFERENCES [Customer] ([Customer_ID]),
   FOREIGN KEY ([agent_id]) REFERENCES [Agent] ([Agent_id])
 );
