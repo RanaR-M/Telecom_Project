@@ -22,3 +22,13 @@ BEGIN
 
     EXEC sp_executesql @SQLQuery, N'@ChurnStatus VARCHAR(50)', @ChurnStatus;
 END;
+
+--Display Churn Customer With Reason
+CREATE PROCEDURE DisplayChurnCustomerWithReason
+AS
+BEGIN
+    SELECT cc.Outer_ID, cc.Feedback, cc.Tenure_in_Month,
+           cc.Churn_Date, cr.Reason_Description
+    FROM Churn_Customer cc
+    JOIN Churn_Reason cr ON cc.Outer_ID = cr.Churned_ID;
+END;
