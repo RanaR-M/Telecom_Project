@@ -1,11 +1,6 @@
 use [Telcom]
 ---Ahmed----
 
-CREATE TABLE [Aquisition_Channel] (
-[Channel_ID] int PRIMARY KEY,
-[Channel_Name] varchar(50) NOT NULL
-)
-GO
 
 CREATE TABLE [Customer] (
   [Customer_ID] int PRIMARY KEY,
@@ -64,6 +59,11 @@ CREATE TABLE Receiving_Notification (
     CONSTRAINT Customer_Notification FOREIGN KEY (Notification_ID) REFERENCES [Notification] (Notification_ID),
     CONSTRAINT Customer_Recieve_Notification FOREIGN KEY (Customer_ID) REFERENCES customer(Customer_ID)
 )
+CREATE TABLE [Aquisition_Channel] (
+[Channel_ID] int PRIMARY KEY,
+[Channel_Name] varchar(50) NOT NULL
+)
+
 
 ----- Rana ------
 
