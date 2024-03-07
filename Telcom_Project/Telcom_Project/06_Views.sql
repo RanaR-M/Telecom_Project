@@ -1,12 +1,14 @@
                    ---HADY---
 --view Acqcithionchanel with #customer
 go
- CREATE OR ALTER VIEW Acqcithionchanelwithnumberofcustomer 
+CREATE OR ALTER VIEW Acqcithionchanelwithnumberofcustomer 
 AS
-SELECT COUNT(c.Channel_ID) AS Number_of_Customers, ac.[Channel_Name]
+SELECT ac.[Channel_Name], COUNT(c.Channel_ID) AS Number_of_Customers
 FROM Customer c
 JOIN [Aquisition_Channel] ac ON c.Channel_ID = ac.Channel_ID
 GROUP BY ac.[Channel_Name];
+
+select * from Acqcithionchanelwithnumberofcustomer 
 
 go 
 --Display Info About Customer For Agent  
@@ -26,6 +28,9 @@ JOIN
 JOIN 
     InternetService ins ON custInt.InternetServiceID = ins.InternetServiceID;
 GO
+select * from CustomerInternetInfo
+
+GO
 --Total Revenue Per Sta
  CREATE OR ALTER VIEW TotalRevenueStatus
 AS
@@ -36,6 +41,8 @@ SUM(( CI.[TotalCharges] - CI.[TotalRefunds] ) +
 FROM [dbo].[CustomerInternet] CI join Customer C
 ON C.Customer_ID = CI.CustomerID 
 GROUP BY C.[Status]
+
+SELECT * FROM TotalRevenueStatus
 -- Rana
 
 -- Get # customers by gender
@@ -44,33 +51,37 @@ GO
 AS
 
 	SELECT
+	Gender,
 	COUNT(Customer_ID) '# customer'
-	, Gender
 	FROM
 	Customer
 	GROUP BY Gender
 
+SELECT * FROM countGenderCustomer
+
 -- get revenue lost by customer churned
-/*
+
 GO
  CREATE OR ALTER VIEW TotalRevenueLossChurn
 AS
 	SELECT
 	CHCust.Customer_ID,
-	SUM(Cust.) -- Revenue??
+	SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges) AS Total_Revenue
 	FROM
 	Churn_Customer CHCust
-	LEFT JOIN Customer Cust
-	ON CHCust.Customer_ID = Cust.Customer_ID
-*/
+	LEFT JOIN[CustomerInternet] CI
+	ON CHCust.Customer_ID = CI.CustomerID
+	GROUP BY CHCust.Customer_ID
+
+	SELECT * FROM TotalRevenueLossChurn
 
 -- get avg charge by servie type
 GO
  CREATE OR ALTER VIEW AVGChargeService
 AS
 	SELECT
-	AVG(MonthlyCharges) 'AVG Monthly Charges',
-	ServiceType
+	ServiceType,
+	AVG(MonthlyCharges) 'AVG Monthly Charges'
 	FROM
 	CustomerInternet CustInt
 	LEFT JOIN InternetService Int
@@ -78,15 +89,19 @@ AS
 	GROUP BY ServiceType
 GO
 
+SELECT * FROM AVGChargeService
+
 -- Ahmed
 
 	-- what is the number of customers per city?
+GO
  CREATE OR ALTER VIEW V_Number_Of_Customers_Per_City
 AS
 SELECT L.City, COUNT(C.Customer_ID) 'Count Of Customers'
 FROM Location L join Customer C 
 ON L.Customer_ID = C.Customer_ID
-GROUP BY L.City
+GROUP BY L.City 
+SELECT * FROM V_Number_Of_Customers_Per_City
 GO
 
 -- NO of calls answerd per agent and his satisfaction rate?
@@ -96,26 +111,28 @@ SELECT
 	A.Agent_id,
 	A.Name 'Agent Name',
 	SUM(cast(CCA.answered as int)) 'No Of Answered Calls',
+	SUM(cast(CCA.resolution_status as int)) 'No Of Resolved Calls',
 	AVG(satisfaction_rating) 'Avg Satisfaction Rate'
 FROM Agent A 
 join Call_Customer_Agent CCA
 ON A.Agent_id = CCA.agent_id
 GROUP BY A.Agent_id, A.Name
+SELECT * FROM V_#CallsAnswered_AndSatisfactionRate_PerCustomer
 GO
 
-/*
+
 -- Total Revenue Company Gain From Each City?
  CREATE OR ALTER VIEW V_Total_Revenue_Per_City
 AS
 SELECT 
 	L.city,
-	SUM(C.Total_Revenue) TR
-FROM customer C join [Location] L 
-ON C.customer_id = L.customer_id
-GROUP BY SUM(C.Total_Revenue)
+	SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges) AS Total_Revenue TR
+FROM CustomerInternet CI join [Location] L 
+ON CI.customer_id = L.customer_id
+GROUP BY L.city
 ORDER BY TR DESC
 GO
-*/
+
 
 GO
 -- Agent Performance 
