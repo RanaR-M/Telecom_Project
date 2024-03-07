@@ -51,8 +51,8 @@ AS
 BEGIN
     DECLARE @Customer_ID INT;
 
-    INSERT INTO [Customer] ([No_of_Dependent], [DOB], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
-    VALUES (@No_of_Dependent, @DOB, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
+    INSERT INTO [Customer] ([No_of_Dependent], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
+    VALUES (@No_of_Dependent, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
 
     SET @Customer_ID = IDENT_CURRENT('Customer') ; -- Get the last inserted Customer_ID
 
@@ -249,14 +249,15 @@ BEGIN
 	[OnlineBackup],
 	[Quota],
 	[DeviceProtection],
-	[service_type] 'PhoneServiceType',
 	[multiple_lines]
 	FROM
-	[dbo].[InternetService] INTServ
+	[dbo].[CustomerInternet] CustINTServ
+	LEFT JOIN [dbo].[InternetService] INTServ
+	ON INTServ.InternetServiceID = CustINTServ.InternetServiceID
 	LEFT JOIN [dbo].[Phone_Service] PHServ
-	ON INTServ.CustomerID = PHServ.Customer_ID
+	ON CustINTServ.CustomerID = PHServ.Customer_ID
 	WHERE 
-	INTServ.CustomerID = @Customer_ID
+	CustINTServ.CustomerID = @Customer_ID
 END
 
 
@@ -435,7 +436,7 @@ EXEC CallsHandledByAgent @AgentID = edylo
 GO
 
 -- insert customers offers
-CREATE PROC TAKING_OFFER @OFFER_ID INT,@CUSTOMER_ID INT
+CREATE OR ALTER PROC TAKING_OFFER @OFFER_ID INT,@CUSTOMER_ID INT
 AS 
 BEGIN TRY
 INSERT INTO [dbo].[Taking Offers] VALUES (@OFFER_ID,@CUSTOMER_ID)

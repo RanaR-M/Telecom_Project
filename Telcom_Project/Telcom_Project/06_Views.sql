@@ -1,7 +1,7 @@
                    ---HADY---
 --view Acqcithionchanel with #customer
 go
-CREATE VIEW Acqcithionchanelwithnumberofcustomer 
+ CREATE OR ALTER VIEW Acqcithionchanelwithnumberofcustomer 
 AS
 SELECT COUNT(c.Channel_ID) AS Number_of_Customers, ac.[Channel_Name]
 FROM Customer c
@@ -10,7 +10,7 @@ GROUP BY ac.[Channel_Name];
 
 go 
 --Display Info About Customer For Agent  
-CREATE VIEW CustomerInternetInfo AS
+ CREATE OR ALTER VIEW CustomerInternetInfo AS
 SELECT 
     c.[Customer_ID],
     c.[Gender],
@@ -22,10 +22,12 @@ FROM
 JOIN 
     [New_Comer] nc ON c.[Customer_ID] = nc.[Customer_ID]
 JOIN 
-    InternetService ins ON c.[Customer_ID] = ins.[CustomerID];
-
+	[dbo].[CustomerInternet] custInt ON custInt.[CustomerID] = nc.Customer_ID
+JOIN 
+    InternetService ins ON custInt.InternetServiceID = ins.InternetServiceID;
+GO
 --Total Revenue Per Sta
-CREATE VIEW TotalRevenueStatus
+ CREATE OR ALTER VIEW TotalRevenueStatus
 AS
 SELECT
 C.[Status],
@@ -38,7 +40,7 @@ GROUP BY C.[Status]
 
 -- Get # customers by gender
 GO
-CREATE VIEW countGenderCustomer
+ CREATE OR ALTER VIEW countGenderCustomer
 AS
 
 	SELECT
@@ -49,9 +51,9 @@ AS
 	GROUP BY Gender
 
 -- get revenue lost by customer churned
-
+/*
 GO
-CREATE VIEW TotalRevenueLossChurn
+ CREATE OR ALTER VIEW TotalRevenueLossChurn
 AS
 	SELECT
 	CHCust.Customer_ID,
@@ -60,11 +62,11 @@ AS
 	Churn_Customer CHCust
 	LEFT JOIN Customer Cust
 	ON CHCust.Customer_ID = Cust.Customer_ID
-
+*/
 
 -- get avg charge by servie type
 GO
-CREATE VIEW AVGChargeService
+ CREATE OR ALTER VIEW AVGChargeService
 AS
 	SELECT
 	AVG(MonthlyCharges) 'AVG Monthly Charges',
@@ -79,7 +81,7 @@ GO
 -- Ahmed
 
 	-- what is the number of customers per city?
-CREATE VIEW V_Number_Of_Customers_Per_City
+ CREATE OR ALTER VIEW V_Number_Of_Customers_Per_City
 AS
 SELECT L.City, COUNT(C.Customer_ID) 'Count Of Customers'
 FROM Location L join Customer C 
@@ -88,20 +90,22 @@ GROUP BY L.City
 GO
 
 -- NO of calls answerd per agent and his satisfaction rate?
-CREATE VIEW V_#CallsAnswered_AndSatisfactionRate_PerCustomer
+ CREATE OR ALTER VIEW V_#CallsAnswered_AndSatisfactionRate_PerCustomer
 AS
 SELECT 
 	A.Agent_id,
 	A.Name 'Agent Name',
-	SUM(CCA.answered) 'No Of Answered Calls',
+	SUM(cast(CCA.answered as int)) 'No Of Answered Calls',
 	AVG(satisfaction_rating) 'Avg Satisfaction Rate'
-FROM Agent A join Call_Customer_Agent CCA
+FROM Agent A 
+join Call_Customer_Agent CCA
 ON A.Agent_id = CCA.agent_id
-GROUP BY A.Agent_id
+GROUP BY A.Agent_id, A.Name
 GO
 
+/*
 -- Total Revenue Company Gain From Each City?
-CREATE VIEW V_Total_Revenue_Per_City
+ CREATE OR ALTER VIEW V_Total_Revenue_Per_City
 AS
 SELECT 
 	L.city,
@@ -111,9 +115,11 @@ ON C.customer_id = L.customer_id
 GROUP BY SUM(C.Total_Revenue)
 ORDER BY TR DESC
 GO
+*/
 
+GO
 -- Agent Performance 
-CREATE VIEW vw_AgentPerformance AS
+ CREATE OR ALTER VIEW vw_AgentPerformance AS
 SELECT
     a.Agent_ID,
     a.[Name] AS AgentName,
@@ -129,7 +135,9 @@ JOIN
 GROUP BY
     a.Agent_ID, a.[Name], a.[HANDLING_TIME]
                         -- VIEW CustomerSatisfaction 
-create view vw_CustomerSatisfaction
+GO
+ CREATE OR ALTER view vw_CustomerSatisfaction
+as
 SELECT
     Customer_ID,
     AVG(Satisfaction_Rating) AS AvgSatisfaction
@@ -138,7 +146,9 @@ FROM
 GROUP BY
     Customer_ID
                           --TopPerformingAgents
-CREATE VIEW vw_TopPerformingAgents AS
+GO
+ CREATE OR ALTER VIEW vw_TopPerformingAgents 
+AS
 SELECT
     Agent_ID,
     COUNT(Call_ID) AS TotalCallsHandled
@@ -148,45 +158,29 @@ WHERE
     Answered = 1
 GROUP BY
     Agent_ID
-ORDER BY
-    TotalCallsHandled DESC
 	                        ---AvgMonthlyCharge
-CREATE VIEW vw_AvgMonthlyCharge AS
+GO
+ CREATE OR ALTER VIEW vw_AvgMonthlyCharge AS
 SELECT 
     ServiceType,
     AVG(MonthlyCharges) AS AvgMonthlyCharge
 FROM InternetService  i
 JOIN CustomerInternet c ON i.InternetServiceID = c.InternetServiceID
 GROUP BY ServiceType
-                         -- Customer Age Brackets
-CREATE VIEW CustAgeBrackets AS
-SELECT
-    Customer_ID,
-    DOB,
-    CASE
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) < 18 THEN 'Under 18'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 18 AND 24 THEN 'Young  (18-24)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 25 AND 34 THEN 'Adults (25-34)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 35 AND 44 THEN 'Adults (35-44)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 45 AND 54 THEN 'Adults (45-54)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 55 AND 64 THEN 'old (55-64)'
-        ELSE 'Seniors (65 and above)'
-    END AS AgeBracket
-FROM
-    Customer
 
 	            -- churn Customers by Age Group
-CREATE VIEW vw_CustByAgeGroup AS
+GO
+ CREATE OR ALTER VIEW vw_CustByAgeGroup AS
 SELECT
     Customer_ID,  
-    DATEDIFF(YEAR, C.DOB, GETDATE()) AS Age,
+    age,
     CASE
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) < 18 THEN 'Under 18'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 18 AND 24 THEN 'Young  (18-24)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 25 AND 34 THEN 'Adults (25-34)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 35 AND 44 THEN 'Adults (35-44)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 45 AND 54 THEN 'Adults (45-54)'
-        WHEN DATEDIFF(YEAR, DOB, GETDATE()) BETWEEN 55 AND 64 THEN 'old (55-64)'
+        WHEN age < 18 THEN 'Under 18'
+        WHEN age BETWEEN 18 AND 24 THEN 'Young  (18-24)'
+        WHEN age BETWEEN 25 AND 34 THEN 'Adults (25-34)'
+        WHEN age BETWEEN 35 AND 44 THEN 'Adults (35-44)'
+        WHEN age BETWEEN 45 AND 54 THEN 'Adults (45-54)'
+        WHEN age BETWEEN 55 AND 64 THEN 'old (55-64)'
         ELSE 'Seniors (65 and above)' 
     END AS AgeGroup,
     CASE
