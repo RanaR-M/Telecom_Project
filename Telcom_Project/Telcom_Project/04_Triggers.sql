@@ -12,3 +12,7 @@ BEGIN
     FROM [dbo].[Call_Customer_Agent] cca
     INNER JOIN inserted i ON cca.call_id = i.call_id;
 END;
+
+GO
+--
+--SEND OFFERS 

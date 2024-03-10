@@ -25,3 +25,27 @@ VALUES
 ('Mailed Check'),
 ('Credit Card')
 
+INSERT INTO [dbo].[Agent] (Name,[HANDLING_TIME] )
+VALUES
+    ('Diane', 57),
+    ('Becky', 52),
+    ('Stewart', 24),
+    ('Greg', 28),
+    ('Jim', 39),
+    ('Joe', 3),
+    ('Martha', 25),
+    ('Dan', 30);
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

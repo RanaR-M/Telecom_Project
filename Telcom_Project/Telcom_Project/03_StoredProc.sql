@@ -19,7 +19,7 @@ AS
 BEGIN
     DECLARE @SQLQuery NVARCHAR(MAX);
 
-    SET @SQLQuery = 'SELECT * FROM Customers WHERE ChurnStatus = @ChurnStatus';
+    SET @SQLQuery = 'SELECT * FROM Customer WHERE [Status] = @ChurnStatus';
 
     EXEC sp_executesql @SQLQuery, N'@ChurnStatus VARCHAR(50)', @ChurnStatus;
 END;
@@ -39,7 +39,7 @@ GO
 --Form for Newcomers 
  CREATE OR ALTER PROCEDURE CreateNewcomerForm
     @No_of_Dependent INT,
-    @DOB DATE,
+    @age int,
     @Email VARCHAR(100),
     @Has_Dependent BIT,
     @Has_Referrals BIT,
