@@ -7,7 +7,7 @@ SELECT ac.[Channel_Name], COUNT(c.Channel_ID) AS Number_of_Customers
 FROM Customer c
 JOIN [Aquisition_Channel] ac ON c.Channel_ID = ac.Channel_ID
 GROUP BY ac.[Channel_Name];
-
+go
 select * from Acqcithionchanelwithnumberofcustomer 
 
 go 
@@ -16,15 +16,13 @@ go
 SELECT 
     c.[Customer_ID],
     c.[Gender],
-    nc.[Contract_Type],
+    c.[Contract_Type],
     ins.[ServiceType],
     ins.[Quota]
 FROM 
     Customer c
 JOIN 
-    [New_Comer] nc ON c.[Customer_ID] = nc.[Customer_ID]
-JOIN 
-	[dbo].[CustomerInternet] custInt ON custInt.[CustomerID] = nc.Customer_ID
+	[dbo].[CustomerInternet] custInt ON custInt.[CustomerID] = c.Customer_ID
 JOIN 
     InternetService ins ON custInt.InternetServiceID = ins.InternetServiceID;
 GO
@@ -36,12 +34,12 @@ GO
 AS
 SELECT
 C.[Status],
-SUM(( CI.[TotalCharges] - CI.[TotalRefunds] ) +
-(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges)) AS Total_Revenue 
+round(SUM(( CI.[TotalCharges] - CI.[TotalRefunds] ) +
+(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges)),2) AS Total_Revenue 
 FROM [dbo].[CustomerInternet] CI join Customer C
 ON C.Customer_ID = CI.CustomerID 
 GROUP BY C.[Status]
-
+go
 SELECT * FROM TotalRevenueStatus
 -- Rana
 
@@ -56,24 +54,25 @@ AS
 	FROM
 	Customer
 	GROUP BY Gender
-
+GO
 SELECT * FROM countGenderCustomer
 
 -- get revenue lost by customer churned
+
 
 GO
  CREATE OR ALTER VIEW TotalRevenueLossChurn
 AS
 	SELECT
 	CHCust.Customer_ID,
-	SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges) AS Total_Revenue
+	ROUND(SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges),2) AS Total_Revenue
 	FROM
 	Churn_Customer CHCust
 	LEFT JOIN[CustomerInternet] CI
 	ON CHCust.Customer_ID = CI.CustomerID
 	GROUP BY CHCust.Customer_ID
-
-	SELECT * FROM TotalRevenueLossChurn
+GO
+SELECT * FROM TotalRevenueLossChurn
 
 -- get avg charge by servie type
 GO
@@ -81,7 +80,7 @@ GO
 AS
 	SELECT
 	ServiceType,
-	AVG(MonthlyCharges) 'AVG Monthly Charges'
+	ROUND(AVG(MonthlyCharges),2) 'AVG Monthly Charges'
 	FROM
 	CustomerInternet CustInt
 	LEFT JOIN InternetService Int
@@ -100,7 +99,8 @@ AS
 SELECT L.City, COUNT(C.Customer_ID) 'Count Of Customers'
 FROM Location L join Customer C 
 ON L.Customer_ID = C.Customer_ID
-GROUP BY L.City 
+GROUP BY L.City
+GO
 SELECT * FROM V_Number_Of_Customers_Per_City
 GO
 
@@ -117,20 +117,21 @@ FROM Agent A
 join Call_Customer_Agent CCA
 ON A.Agent_id = CCA.agent_id
 GROUP BY A.Agent_id, A.Name
+GO
 SELECT * FROM V_#CallsAnswered_AndSatisfactionRate_PerCustomer
 GO
 
 
 -- Total Revenue Company Gain From Each City?
- CREATE OR ALTER VIEW V_Total_Revenue_Per_City
+CREATE OR ALTER VIEW V_Total_Revenue_Per_City
 AS
 SELECT 
 	L.city,
-	SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges) AS Total_Revenue TR
-FROM CustomerInternet CI join [Location] L 
-ON CI.customer_id = L.customer_id
+	ROUND(SUM(CI.totalExtraDataCharges + CI.TotalLongDistanceCharges),2) AS Total_Revenue 
+FROM CustomerInternet CI 
+join [Location] L 
+ON CI.CustomerID = L.customer_id
 GROUP BY L.city
-ORDER BY TR DESC
 GO
 
 
@@ -143,8 +144,8 @@ SELECT
     a.[HANDLING_TIME] AS AvgHandlingTime,
     COUNT(cca.Call_ID) AS TotalCallsHandled,
     SUM(CAST(cca.Answered AS INT)) AS TotalAnsweredCalls,
-    AVG(CAST(cca.satisfaction_rating AS FLOAT)) AS AvgSatisfactionRating,
-    AVG(CAST(cca.speed_of_answer AS FLOAT)) AS AvgSpeedOfAnswer
+    ROUND(AVG(CAST(cca.satisfaction_rating AS FLOAT)),2) AS AvgSatisfactionRating,
+    ROUND(AVG(CAST(cca.speed_of_answer AS FLOAT)),2)AS AvgSpeedOfAnswer
 FROM
     [dbo].[Agent] a
 JOIN
@@ -152,6 +153,9 @@ JOIN
 GROUP BY
     a.Agent_ID, a.[Name], a.[HANDLING_TIME]
                         -- VIEW CustomerSatisfaction 
+
+-- DOESN''T LOOK RIGHT
+
 GO
  CREATE OR ALTER view vw_CustomerSatisfaction
 as
@@ -167,20 +171,26 @@ GO
  CREATE OR ALTER VIEW vw_TopPerformingAgents 
 AS
 SELECT
-    Agent_ID,
+	TOP(5)
+    CA.Agent_ID, 
+	Agent.[Name],
     COUNT(Call_ID) AS TotalCallsHandled
 FROM
-    Call_Customer_Agent
+    Call_Customer_Agent CA
+LEFT JOIN Agent
+ON CA.agent_id = Agent.Agent_id
 WHERE
     Answered = 1
 GROUP BY
-    Agent_ID
+    CA.Agent_ID, Agent.[Name]
+ORDER BY
+	TotalCallsHandled
 	                        ---AvgMonthlyCharge
 GO
  CREATE OR ALTER VIEW vw_AvgMonthlyCharge AS
 SELECT 
     ServiceType,
-    AVG(MonthlyCharges) AS AvgMonthlyCharge
+    ROUND(AVG(MonthlyCharges),2) AS AvgMonthlyCharge
 FROM InternetService  i
 JOIN CustomerInternet c ON i.InternetServiceID = c.InternetServiceID
 GROUP BY ServiceType
