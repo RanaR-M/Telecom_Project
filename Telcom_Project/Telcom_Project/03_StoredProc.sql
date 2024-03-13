@@ -45,8 +45,8 @@ GO
 --Form for Newcomers --------------  error ---- 
 CREATE OR ALTER PROCEDURE CreateNewcomerForm
     @No_of_Dependent INT,
-    @age int,
-    @Email VARCHAR(100),
+    @Age int,
+ 
     @Has_Dependent BIT,
     @Has_Referrals BIT,
     @No_of_Referrals INT,
@@ -57,8 +57,8 @@ AS
 BEGIN
     DECLARE @Customer_ID INT;
  
-    INSERT INTO [Customer] ([No_of_Dependent], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
-    VALUES (@No_of_Dependent, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
+    INSERT INTO [Customer] ([Age],[No_of_Dependent], [Has_Dependent], [Has_Referrals], [No_of_Referrals],[Contract_Type])
+    VALUES (@Age,@No_of_Dependent, @Has_Dependent, @Has_Referrals, @No_of_Referrals,@Contract_Type);
  
     SET @Customer_ID = IDENT_CURRENT('Customer') ; -- Get the last inserted Customer_ID
  
@@ -85,13 +85,13 @@ BEGIN
     CLOSE channel;
     DEALLOCATE channel;
  
-    INSERT INTO [New_Comer] ([Customer_ID], [Contract_Type], [Acquisition_Date])
-    VALUES (@Customer_ID, @Contract_Type, GETDATE());
+    INSERT INTO [New_Comer] ([Customer_ID], [Acquisition_Date])
+    VALUES (@Customer_ID, GETDATE());
  
     --  print the inserted data
     SELECT @Customer_ID AS Customer_ID,
            @No_of_Dependent AS No_of_Dependent,
-           @DOB AS DOB,
+           @Age AS Age ,
            @Has_Dependent AS Has_Dependent,
            @Has_Referrals AS Has_Referrals,
            @No_of_Referrals AS No_of_Referrals,
