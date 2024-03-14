@@ -42,65 +42,39 @@ END;
 EXEC DisplayChurnCustomerWithReason
  
 GO
---Form for Newcomers --------------  error ---- 
+
 CREATE OR ALTER PROCEDURE CreateNewcomerForm
     @No_of_Dependent INT,
     @age int,
-    @Email VARCHAR(100),
     @Has_Dependent BIT,
     @Has_Referrals BIT,
     @No_of_Referrals INT,
     @ChannelName VARCHAR(50),
     @Contract_Type VARCHAR(30),
-    @Acquisition_Date DATE
+	@gender varchar(20),
+	@married BIT	
 AS
 BEGIN
-    DECLARE @Customer_ID INT;
+    DECLARE @Customer_ID INT = (SELECT MAX([Customer_ID]) FROM [dbo].[Customer]);
+	SET @Customer_ID += 1 
+	DECLARE @channelID INT = (SELECT [Channel_ID] FROM [dbo].[Aquisition_Channel] WHERE [Channel_Name] = @ChannelName)
  
-    INSERT INTO [Customer] ([No_of_Dependent], [Has_Dependent], [Has_Referrals], [No_of_Referrals])
-    VALUES (@No_of_Dependent, @Has_Dependent, @Has_Referrals, @No_of_Referrals);
+    INSERT INTO [Customer] ([Customer_ID], [CLTV],[Gender], [Married], [No_of_Dependent], [Has_Dependent], 
+	[Has_Referrals], [No_of_Referrals], [contract_type], [Age], [Channel_ID], [Status])
+    VALUES 
+	(@Customer_ID, 0, @gender, @married, @No_of_Dependent, @Has_Dependent,
+	@Has_Referrals, @No_of_Referrals, @Contract_Type, @age, @channelID, 'Joined');
  
-    SET @Customer_ID = IDENT_CURRENT('Customer') ; -- Get the last inserted Customer_ID
- 
-    DECLARE channel CURSOR FOR
-    SELECT [Channel_ID], [Channel_Name]
-    FROM [Aquisition_Channel];
- 
-    OPEN channel;
- 
-    DECLARE @Channel_ID INT,
-            @Channel_Name NVARCHAR(100);
- 
-    FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        IF @Channel_Name = @ChannelName
-        BEGIN
-            INSERT INTO [Customer] ([Channel_ID]) VALUES (@Channel_ID);
-        END
- 
-        FETCH NEXT FROM channel INTO @Channel_ID, @Channel_Name;
-    END;
- 
-    CLOSE channel;
-    DEALLOCATE channel;
- 
-    INSERT INTO [New_Comer] ([Customer_ID], [Contract_Type], [Acquisition_Date])
-    VALUES (@Customer_ID, @Contract_Type, GETDATE());
+	
+    INSERT INTO [New_Comer] ([Customer_ID], [Acquisition_Date])
+    VALUES (@Customer_ID, GETDATE());
  
     --  print the inserted data
-    SELECT @Customer_ID AS Customer_ID,
-           @No_of_Dependent AS No_of_Dependent,
-           @DOB AS DOB,
-           @Has_Dependent AS Has_Dependent,
-           @Has_Referrals AS Has_Referrals,
-           @No_of_Referrals AS No_of_Referrals,
-           @ChannelName AS ChannelName,
-           @Contract_Type AS Contract_Type,
-           @Acquisition_Date AS Acquisition_Date;
+    SELECT * FROM [dbo].[Customer]
+	WHERE [Customer_ID] = @Customer_ID
 END;
 GO
------------------------------- error -------------------------------------
+
  
 -- # customers per city
 CREATE OR ALTER PROC PROC_NumOf_Customers_Per_City (@City varchar(50))
@@ -177,7 +151,8 @@ GO
  
 ---------------------------- as soon as possible ----------------
 -- form for the churned customer
-CREATE OR ALTER PROC Churned_Customer_Form (@Customer_ID int, @Feedback varchar(max), @Tenure int, @Churn_Date date, @Reason varchar(max))
+CREATE OR ALTER PROC Churned_Customer_Form (@Customer_ID int, @Feedback varchar(max), 
+@Tenure int, @Churn_Date date, @Reason varchar(max))
 AS
 BEGIN
 	INSERT INTO [Churn_Customer] (Customer_ID,Feedback,Tenure_in_Month,Churn_Date)
@@ -206,9 +181,7 @@ BEGIN
 		else 'Other'
 		End 
 END
----------------------------- as soon as possible ----------------
----------------------------- as soon as possible ----------------
----------------------------- as soon as possible ----------------
+
  
  
 -- proc 7
@@ -255,9 +228,8 @@ BEGIN
 END
  
 -- TEST 
-EXEC GetRiskLevelCustomer_Proc 16
-------------------error ----------------
-------------------error ----------------
+EXEC GetRiskLevelCustomer_Proc 119
+
 -- PROC 18
 -- This procedure displays services for a particular customer, taking their ID as a parameter.
  
@@ -289,8 +261,7 @@ BEGIN
 END
  
 -- TEST
-EXEC GetServiceCustomer 3
-------------------error ----------------
+EXEC GetServiceCustomer 119
  
  
 -- PROC 21
@@ -314,7 +285,7 @@ END
 EXEC GetCountCallsTopic 'Contract related'
  
 --- this procs gets # of calls by topic
----------------------- remove ---------------
+
 GO
 CREATE OR ALTER PROC GetCountCallsALLTopic
 AS
@@ -325,7 +296,7 @@ BEGIN
 	FROM [dbo].[Call_Customer_Agent]
 	GROUP BY topic
 END
----------------------- remove ---------------
+
  
 --23 Display resolved and answered calls per agent
 --This procedure displays the number of resolved and answered calls handled by a specific agent.
@@ -346,6 +317,7 @@ EXEC GetResolved 5010
 
 --24 Display success rate per agent
 --This procedure displays the success rate of calls handled by a specific agent.
+GO
 CREATE OR ALTER PROCEDURE Agent_Success 
     @agent_id INT
 AS
@@ -415,32 +387,7 @@ END
 EXEC HighValueCustomers
 GO
  
---EXEC HighValueCustomers
-                -- offers to cust with low satisfaction ratings<3
- 
- 
------------- TODO ------------------------
- 
-/*
-CREATE OR ALTER PROC OffersToLowSatisfactionCust
-AS
-BEGIN
-     IF
-	 Customer_ID IN 
-	(
-	SELECT 
-	Customer_ID 
-	FROM 
-	[dbo].[Call_Customer_Agent] 
-	WHERE 
-	satisfaction_rating < 3
-	)
-	THEN 
-	PRINT(offer_label)
- 
-END
- 
-*/
+
 -- # of calls resolved
  
 GO
@@ -482,4 +429,106 @@ SELECT'This Offer Is Already Existed'
 else
 INSERT INTO [dbo].[Offers] VALUES( @Label,@STARTDATE,@ENDDATE)
 GO
--- TEST
+
+
+GO
+CREATE OR ALTER PROCEDURE GET_CUSTOMER_INFO 
+    @customer_id INT
+AS
+BEGIN
+    SELECT 
+        c.*, 
+        ci.*, 
+        isv.*, 
+        ps.*
+    FROM
+        dbo.Customer AS c
+    LEFT JOIN 
+        dbo.CustomerInternet AS ci ON c.Customer_ID = ci.CustomerID
+    LEFT JOIN
+        dbo.InternetService AS isv ON ci.InternetServiceID = isv.InternetServiceID
+    LEFT JOIN
+        dbo.Phone_Service AS ps ON ps.Customer_ID = c.Customer_ID
+    WHERE 
+        c.Customer_ID = @customer_id;
+END;
+
+GO
+-- create proc to display welcome message and Views that stackholder allow to Query 
+CREATE or alter PROCEDURE hi_telecom
+AS
+BEGIN
+    PRINT 'Welcome, sir!';
+    PRINT 'Feel free to explore the information and generate valuable insights.';
+ 
+    -- list of views the user has access to
+    PRINT 'List of Views:'
+ 
+    DECLARE @ViewName NVARCHAR(255);
+ 
+    DECLARE view_cursor CURSOR FOR
+    SELECT TABLE_NAME
+    FROM INFORMATION_SCHEMA.VIEWS
+    WHERE TABLE_SCHEMA = 'dbo';
+ 
+    OPEN view_cursor;
+ 
+    FETCH NEXT FROM view_cursor INTO @ViewName;
+ 
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        PRINT @ViewName;
+        FETCH NEXT FROM view_cursor INTO @ViewName;
+    END
+ 
+    CLOSE view_cursor
+    DEALLOCATE view_cursor
+END
+
+go
+CREATE OR ALTER PROCEDURE HI_QA_Welcome
+AS
+BEGIN
+    PRINT 'Welcome, QA Team!';
+    PRINT 'Feel free to query the allowed views and gather valuable insights.';
+END;
+go
+
+CREATE PROCEDURE UpdateCustomerStatus
+AS
+BEGIN
+    DECLARE @customerId INT;
+    DECLARE @acquisitionDate DATE;
+    DECLARE @status VARCHAR(50);
+
+    DECLARE customerCursor CURSOR FOR
+    SELECT NC.[Acquisition_Date], NC.[Customer_ID]
+    FROM [dbo].[New_Comer] NC
+    JOIN customer c ON c.Customer_id = NC.Customer_id;
+
+    OPEN customerCursor;
+
+    FETCH NEXT FROM customerCursor INTO @acquisitionDate, @customerId;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        IF DATEDIFF(MONTH, @acquisitionDate, GETDATE()) <= 1
+            SET @status = 'Joined';
+        ELSE IF DATEDIFF(MONTH, @acquisitionDate, GETDATE()) > 1 
+            AND NOT EXISTS (SELECT 1 FROM [dbo].[Churn_Customer] OC WHERE OC.Customer_id = @customerId)
+            SET @status = 'stayed';
+        ELSE
+            SET @status = 'CHURN';
+
+        -- Update status 
+        UPDATE customer
+        SET status = @status
+        WHERE Customer_id = @customerId;
+
+        -- Fetch the next row
+        FETCH NEXT FROM customerCursor INTO @acquisitionDate, @customerId;
+    END
+
+    CLOSE customerCursor;
+    DEALLOCATE customerCursor;
+END;

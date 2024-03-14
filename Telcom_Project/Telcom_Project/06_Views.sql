@@ -154,7 +154,6 @@ GROUP BY
     a.Agent_ID, a.[Name], a.[HANDLING_TIME]
                         -- VIEW CustomerSatisfaction 
 
--- DOESN''T LOOK RIGHT
 
 GO
  CREATE OR ALTER view vw_CustomerSatisfaction
@@ -216,4 +215,5 @@ SELECT
     END AS ChurnStatus
 FROM
     Customer
+
 
