@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+  <meta charset="UTF-8">
+  <title>Churn Predictor</title>
+  <link rel="stylesheet" href = "style.css">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+</head>
+
+<body>
+ <div> 
+    <!-- Gender, SeniorCitizen, Partner, PhoneService,
+         MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection, 
+         TechSupport, StreamingTV, ChurnScore, StreamingMovies-->
+    <div class ='container'>
+      <div class="title">Churn Predictor</div>
+        <form action="{{ url_for('predict')}}"method="post">
+        <div class="user-details">
+
+          <div class="radio-details">
+            <span class="radio-title">Gender</span>
+            <input type="radio" name ='Gender' id = 'dot-1' value = "1" required = 'required'>
+            <input type="radio" name ='Gender' id = 'dot-2' value = "0" required = required>
+            <div class="category">
+              <label for="dot-1">
+                <span class="dot one"></span>
+                <span class="gender">Male</span>
+              </label>
+              <label for="dot-2">
+                <span class="dot two"></span>
+                <span class="gender">Female</span>
+              </label>
+            </div> 
+          </div>
+          <div class="radio-details">
+            <span class="radio-title">Senior Citizen</span>
+            <input type = "radio" id="dot-1-senior" name="SeniorCitizen" value = "1" required="required">
+            <input type = "radio" id="dot-2-senior" name="SeniorCitizen" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-senior">
+                <span class="dot one"></span>
+                <span class="SeniorCitizen">Yes</span>
+              </label>
+              <label for="dot-2-senior">
+                <span class="dot two"></span>
+                <span class="SeniorCitizen">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Has Partner</span>
+            <input type = "radio" id="dot-1-partner" name="hasPartner" value = "1" required="required">
+            <input type = "radio" id="dot-2-partner" name="hasPartner" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-partner">
+                <span class="dot one"></span>
+                <span class="hasPartner">Yes</span>
+              </label>
+              <label for="dot-2-partner">
+                <span class="dot two"></span>
+                <span class="hasPartner">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Phone Service</span>
+            <input type = "radio" id="dot-1-phone" name="hasPhone" value = "1" required="required">
+            <input type = "radio" id="dot-2-phone" name="hasPhone" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-phone">
+                <span class="dot one"></span>
+                <span class="hasPhone">Yes</span>
+              </label>
+              <label for="dot-2-phone">
+                <span class="dot two"></span>
+                <span class="hasPhone">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Multiple Lines</span>
+            <input type = "radio" id="dot-1-multi" name="hasMulipleLines" value = "1" required="required">
+            <input type = "radio" id="dot-2-multi" name="hasMulipleLines" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-multi">
+                <span class="dot one"></span>
+                <span class="hasMulipleLines">Yes</span>
+              </label>
+              <label for="dot-2-multi">
+                <span class="dot two"></span>
+                <span class="hasMulipleLines">No</span>
+              </label>
+            </div> 
+          </div>
+      
+          <div class="radio-details">
+            <span class="radio-title">Internet Service</span>
+            <input type = "radio" id="dot-1-internet" name="hasInternet" value = "1" required="required">
+            <input type = "radio" id="dot-2-internet" name="hasInternet" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-internet">
+                <span class="dot one"></span>
+                <span class="hasInternet">Yes</span>
+              </label>
+              <label for="dot-2-internet">
+                <span class="dot two"></span>
+                <span class="hasInternet">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Online Security Service</span>
+            <input type = "radio" id="dot-1-security" name="hasOnlineSecurity" value = "1" required="required">
+            <input type = "radio" id="dot-2-security" name="hasOnlineSecurity" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-security">
+                <span class="dot one"></span>
+                <span class="hasOnlineSecurity">Yes</span>
+              </label>
+              <label for="dot-2-security">
+                <span class="dot two"></span>
+                <span class="hasOnlineSecurity">No</span>
+              </label>
+            </div> 
+          </div>
+
+
+          <div class="radio-details">
+            <span class="radio-title">Online Backup Service</span>
+            <input type = "radio" id="dot-1-backup" name="hasOnlineBackup" value = "1" required="required">
+            <input type = "radio" id="dot-2-backup" name="hasOnlineBackup" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-backup">
+                <span class="dot one"></span>
+                <span class="hasOnlineBackup">Yes</span>
+              </label>
+              <label for="dot-2-backup">
+                <span class="dot two"></span>
+                <span class="hasOnlineBackup">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Device Protection Service</span>
+            <input type = "radio" id="dot-1-protection" name="hasDeviceProtection" value = "1" required="required">
+            <input type = "radio" id="dot-2-protection" name="hasDeviceProtection" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-protection">
+                <span class="dot one"></span>
+                <span class="hasDeviceProtection">Yes</span>
+              </label>
+              <label for="dot-2-protection">
+                <span class="dot two"></span>
+                <span class="hasDeviceProtection">No</span>
+              </label>
+            </div> 
+          </div>
+
+          <div class="radio-details">
+            <span class="radio-title">Tech Support Service</span>
+            <input type = "radio" id="dot-1-tech" name="hasTechSupport" value = "1" required="required">
+            <input type = "radio" id="dot-2-tech" name="hasTechSupport" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-tech">
+                <span class="dot one"></span>
+                <span class="hasTechSupport">Yes</span>
+              </label>
+              <label for="dot-2-tech">
+                <span class="dot two"></span>
+                <span class="hasTechSupport">No</span>
+              </label>
+            </div> 
+          </div>
+
+
+          <div class="radio-details">
+            <span class="radio-title">Streaming TV Service</span>
+            <input type = "radio" id="dot-1-tv" name="hasStreamingTV" value = "1" required="required">
+            <input type = "radio" id="dot-2-tv" name="hasStreamingTV" value = "0" required="required">
+            <div class="category">
+              <label for="dot-1-tv">
+                <span class="dot one"></span>
+                <span class="hasStreamingTV">Yes</span>
+              </label>
+              <label for="dot-2-tv">
+                <span class="dot two"></span>
+                <span class="hasStreamingTV">No</span>
+              </label>
+            </div> 
+          </div>
+
+        <div class = 'input-box'>
+          <span class = 'details'>Churn Score</span>
+          <input type="text" name="ChurnScore" placeholder="Enter Churn Score" required="required" />
+        </div>
+
+
+        <div class="radio-details">
+          <span class="radio-title">Streaming Music Service</span>
+          <input type = "radio" id="dot-1-music" name="hasStreamingMusic" value = "1" required="required">
+          <input type = "radio" id="dot-2-music" name="hasStreamingMusic" value = "0" required="required">
+          <div class="category">
+            <label for="dot-1-music">
+              <span class="dot one"></span>
+              <span class="hasStreamingMusic">Yes</span>
+            </label>
+            <label for="dot-2-music">
+              <span class="dot two"></span>
+              <span class="hasStreamingMusic">No</span>
+            </label>
+          </div> 
+      
+          <div class="button">
+            <input type="submit" value = "predict">
+          </div>
+    </form>
+   <b>{{ prediction_text }}</b>
+
+ </div>
+
+
+</body>
+</html>
